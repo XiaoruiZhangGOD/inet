@@ -15,14 +15,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.ieee8022;
+#ifndef __INET_IEEE8022SNAPINSERTER_H
+#define __INET_IEEE8022SNAPINSERTER_H
 
-import inet.queueing.base.PacketFlowBase;
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
+#include "inet/queueing/base/PacketFlowBase.h"
 
-simple Ieee8022LlcInserter extends PacketFlowBase like IIeee8022LlcInserter
+namespace inet {
+
+using namespace inet::queueing;
+
+class INET_API Ieee8022SnapInserter : public PacketFlowBase
 {
-    parameters:
-        @class(Ieee8022LlcInserter);
-        @display("i=block/inserter");
-}
+  protected:
+    virtual void initialize(int stage) override;
+    virtual void processPacket(Packet *packet) override;
+
+  public:
+    static const Protocol *getProtocol(const Ptr<const Ieee8022SnapHeader>& header);
+};
+
+} // namespace inet
+
+#endif // ifndef __INET_IEEE8022SNAPINSERTER_H
 

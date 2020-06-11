@@ -19,10 +19,10 @@ package inet.protocol.ieee8022;
 
 import inet.queueing.base.PacketFlowBase;
 
-simple Ieee8022LlcInserter extends PacketFlowBase like IIeee8022LlcInserter
+simple Ieee8022SnapInserter extends PacketFlowBase like IIeee8022SnapInserter
 {
     parameters:
-        @class(Ieee8022LlcInserter);
+        @class(Ieee8022SnapInserter);
         @display("i=block/inserter");
 }
 

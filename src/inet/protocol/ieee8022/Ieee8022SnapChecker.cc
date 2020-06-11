@@ -19,51 +19,48 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "inet/protocol/ieee8022/Ieee8022LlcChecker.h"
+#include "inet/protocol/ieee8022/Ieee8022SnapChecker.h"
 
 namespace inet {
 
-Define_Module(Ieee8022LlcChecker);
+Define_Module(Ieee8022SnapChecker);
 
-void Ieee8022LlcChecker::initialize(int stage)
+void Ieee8022SnapChecker::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ieee8022, nullptr, outputGate);
-        registerProtocol(Protocol::ieee8022, nullptr, inputGate);
+        registerService(Protocol::ieee8022snap, nullptr, outputGate);
+        registerProtocol(Protocol::ieee8022snap, nullptr, inputGate);
     }
 }
 
-bool Ieee8022LlcChecker::matchesPacket(const Packet *packet) const
+bool Ieee8022SnapChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& llcHeader = packet->peekAtFront<Ieee8022LlcHeader>();
-    auto protocol = getProtocol(llcHeader);
+    const auto& snapHeader = packet->peekAtFront<Ieee8022SnapHeader>();
+    auto protocol = getProtocol(snapHeader);
     return protocol != nullptr;
 }
 
-void Ieee8022LlcChecker::dropPacket(Packet *packet)
+void Ieee8022SnapChecker::dropPacket(Packet *packet)
 {
     EV_WARN << "Unknown protocol, dropping packet\n";
     PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
 }
 
-void Ieee8022LlcChecker::processPacket(Packet *packet)
+void Ieee8022SnapChecker::processPacket(Packet *packet)
 {
-    const auto& llcHeader = packet->popAtFront<Ieee8022LlcHeader>();
-    auto sapInd = packet->addTagIfAbsent<Ieee802SapInd>();
-    sapInd->setSsap(llcHeader->getSsap());
-    sapInd->setDsap(llcHeader->getDsap());
-    //TODO control?
-    auto protocol = getProtocol(llcHeader);
+    const auto& snapHeader = packet->popAtFront<Ieee8022SnapHeader>();
+    auto protocol = getProtocol(snapHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
 }
 
-const Protocol *Ieee8022LlcChecker::getProtocol(const Ptr<const Ieee8022LlcHeader>& llcHeader)
+const Protocol *Ieee8022SnapChecker::getProtocol(const Ptr<const Ieee8022SnapHeader>& snapHeader)
 {
-    int32_t sapData = ((llcHeader->getSsap() & 0xFF) << 8) | (llcHeader->getDsap() & 0xFF);
-    return ProtocolGroup::ieee8022protocol.findProtocol(sapData);
+    if (snapHeader->getOui() == 0)
+        return ProtocolGroup::ethertype.findProtocol(snapHeader->getProtocolId());
+    else
+        return ProtocolGroup::snapOui.findProtocol(snapHeader->getOui());
 }
 
 } // namespace inet

@@ -17,12 +17,13 @@
 
 package inet.protocol.ieee8022;
 
-import inet.queueing.base.PacketFlowBase;
+import inet.queueing.base.PacketFilterBase;
 
-simple Ieee8022LlcInserter extends PacketFlowBase like IIeee8022LlcInserter
+simple Ieee8022SnapChecker extends PacketFilterBase like IIeee8022SnapChecker
 {
     parameters:
-        @class(Ieee8022LlcInserter);
-        @display("i=block/inserter");
+        @class(Ieee8022SnapChecker);
+        @display("i=block/checker");
+        @signal[packetDropped](type=inet::Packet);
 }
 

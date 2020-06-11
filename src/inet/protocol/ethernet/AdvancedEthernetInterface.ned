@@ -17,38 +17,31 @@
 
 package inet.protocol.ethernet;
 
+import inet.common.MessageDispatcher;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.networklayer.common.InterfaceEntry;
 import inet.protocol.common.InterPacketGap;
-import inet.protocol.common.PacketEmitter;
-import inet.protocol.common.PacketStreamer;
-import inet.protocol.common.PaddingInserter;
-import inet.protocol.common.PreemptibleStreamer;
 import inet.protocol.common.ProtocolChecker;
 import inet.protocol.fragmentation.FragmentTagBasedDefragmenter;
 import inet.protocol.ieee8021q.IIeee8021qChecker;
 import inet.protocol.ieee8021q.IIeee8021qInserter;
 import inet.protocol.ieee8022.IIeee8022LlcChecker;
 import inet.protocol.ieee8022.IIeee8022LlcInserter;
+import inet.protocol.ieee8022.IIeee8022SnapChecker;
+import inet.protocol.ieee8022.IIeee8022SnapInserter;
 import inet.protocol.server.PreemptingServer;
 import inet.protocol.transceiver.PreemptibleTransmitter;
 import inet.protocol.transceiver.StreamingReceiver;
-import inet.protocol.transceiver.contract.IPacketReceiver;
-import inet.protocol.transceiver.contract.IPacketTransmitter;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketServer;
 import inet.queueing.contract.ITrafficConditioner;
 import inet.queueing.scheduler.PriorityScheduler;
-import inet.queueing.timing.TimingMeasurementMaker;
-import inet.queueing.timing.TimingMeasurementStarter;
 
-// TODO: add socket handling
-// TODO: dispatch for LLC/ethertype
-// TODO: connect/disconnect handling
 
 moduleinterface ISocketLayer
 {
@@ -214,22 +207,58 @@ module Ieee8022LlcLayer like IIeee8022LlcLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        llcInserter: <default("Ieee8022LlcInserter")> like IIeee8022LlcInserter {
+        classifier: <default("PacketClassifier")> like IPacketClassifier {
             @display("p=200,100");
         }
+        llcInserter: <default("Ieee8022LlcInserter")> like IIeee8022LlcInserter if typename != "" {
+            @display("p=148,362");
+        }
+        snapInserter: <default("Ieee8022SnapInserter")> like IIeee8022SnapInserter if typename != "" {
+            @display("p=119,194");
+        }
+        m1: PacketMultiplexer {
+            @display("p=176,416");
+        }
         protocolChecker: ProtocolChecker {
-            @display("p=500,100");
+            @display("p=600,100");
+        }
+        m2: PacketMultiplexer {
+            @display("p=600,200");
         }
         llcChecker: <default("Ieee8022LlcChecker")> like IIeee8022LlcChecker {
-            @display("p=500,200");
+            @display("p=485,362");
+        }
+        snapChecker: <default("Ieee8022SnapChecker")> like IIeee8022SnapChecker {
+            @display("p=485,233");
+        }
+        dp: MessageDispatcher {
+            @display("p=600,400;b=10,10,,,,1;");
+        }
+        m3: PacketMultiplexer {
+            @display("p=147,282");
+        }
+        dp1: MessageDispatcher {
+            @display("p=501,306;b=10,10,,,,1;");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> llcInserter.in;
-        llcInserter.out --> { @display("m=s"); } --> lowerLayerOut;
+        upperLayerIn --> { @display("m=n"); } --> classifier.in;
+        classifier.out++ --> snapInserter.in if exists(snapInserter);
+        classifier.out++ --> m3.in++ if exists(llcInserter);
+        classifier.out++ --> m1.in++;
+        llcInserter.out --> m1.in++ if exists(llcInserter);
+        snapInserter.out --> m3.in++ if exists(snapInserter);
+        m1.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> llcChecker.in;
-        llcChecker.out --> protocolChecker.in;
+        lowerLayerIn --> { @display("m=s"); } --> dp.in++;
+        dp.out++ --> llcChecker.in;
+        m2.out --> protocolChecker.in;
         protocolChecker.out --> { @display("m=n"); } --> upperLayerOut;
+        m3.out --> llcInserter.in;
+        dp.out++ --> m2.in++;
+        llcChecker.out --> dp1.in++;
+        dp1.out++ --> m2.in++;
+        dp1.out++ --> snapChecker.in;
+        snapChecker.out --> m2.in++;
 }
 
 moduleinterface IEthernetMacLayer

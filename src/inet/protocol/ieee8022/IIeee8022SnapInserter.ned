@@ -17,12 +17,12 @@
 
 package inet.protocol.ieee8022;
 
-import inet.queueing.base.PacketFlowBase;
-
-simple Ieee8022LlcInserter extends PacketFlowBase like IIeee8022LlcInserter
+moduleinterface IIeee8022SnapInserter
 {
     parameters:
-        @class(Ieee8022LlcInserter);
         @display("i=block/inserter");
+    gates:
+        input in;
+        output out;
 }
 
