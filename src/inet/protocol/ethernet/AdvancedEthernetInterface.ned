@@ -246,6 +246,7 @@ moduleinterface IEthernetMacLayer
 module EthernetMacLayer like IEthernetMacLayer
 {
     parameters:
+        bool promiscuous = default(false);
         paddingInserter.minLength = default(60B);
         @display("i=block/layer");
     gates:
@@ -298,6 +299,7 @@ module EthernetMacLayer like IEthernetMacLayer
             @display("p=500,300");
         }
         addressChecker: <default("EthernetAddressChecker")> like IPacketFilter {
+            promiscuous = default(promiscuous);
             @display("p=500,400");
         }
         fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {

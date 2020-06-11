@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -8,22 +8,25 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.protocol.ieee8022;
+package inet.common;
 
-import inet.queueing.base.PacketFlowBase;
-
-simple Ieee8022LlcInserter extends PacketFlowBase like IIeee8022LlcInserter
+//
+//
+//
+simple PacketCommandClassifier
 {
     parameters:
-        @class(Ieee8022LlcInserter);
-        @display("i=block/inserter");
-        bool useSNAP = default(false);  // create EtherFrameWithSNAP frames instead of EthernetIIFrame
+        @display("b=100,5,,,,1;");
+    gates:
+        input in;
+        output packetOut;   // gate for cPacket
+        output messageOut;  // gate for cMessage
 }
 

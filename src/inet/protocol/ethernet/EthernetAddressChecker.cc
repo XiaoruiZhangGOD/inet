@@ -30,7 +30,9 @@ void EthernetAddressChecker::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         promiscuous = par("promiscuous");
-        interfaceEntry = getContainingNicModule(this);
+        interfaceEntry = findContainingNicModule(this);
+        if (!promiscuous && interfaceEntry == nullptr)
+            throw cRuntimeError("Container NIC module required for non-promiscuous mode");
     }
 }
 

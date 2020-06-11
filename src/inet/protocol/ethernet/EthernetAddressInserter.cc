@@ -29,7 +29,7 @@ void EthernetAddressInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        interfaceEntry = getContainingNicModule(this);
+        interfaceEntry = findContainingNicModule(this);
 }
 
 void EthernetAddressInserter::processPacket(Packet *packet)
