@@ -284,23 +284,23 @@ module EthernetMacLayer like IEthernetMacLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        typeOrLengthInserter: <default("EthernetTypeOrLengthInserter")> like IPacketFlow {
-            @display("p=200,100");
-        }
-        ctagInserter: <default("OmittedIeee8021qInserter")> like IIeee8021qInserter {
-            vlanTagType = "c";
-            @display("p=200,200");
-        }
-        stagInserter: <default("OmittedIeee8021qInserter")> like IIeee8021qInserter {
-            vlanTagType = "s";
-            @display("p=200,300");
-        }
-        addressInserter: <default("EthernetAddressInserter")> like IPacketFlow {
-            @display("p=200,400");
-        }
-        paddingInserter: <default("PaddingInserter")> like IPacketFlow {
-            @display("p=200,500");
-        }
+//        typeOrLengthInserter: <default("EthernetTypeOrLengthInserter")> like IPacketFlow {
+//            @display("p=200,100");
+//        }
+//        ctagInserter: <default("OmittedIeee8021qInserter")> like IIeee8021qInserter {
+//            vlanTagType = "c";
+//            @display("p=200,200");
+//        }
+//        stagInserter: <default("OmittedIeee8021qInserter")> like IIeee8021qInserter {
+//            vlanTagType = "s";
+//            @display("p=200,300");
+//        }
+//        addressInserter: <default("EthernetAddressInserter")> like IPacketFlow {
+//            @display("p=200,400");
+//        }
+//        paddingInserter: <default("PaddingInserter")> like IPacketFlow {
+//            @display("p=200,500");
+//        }
         queue: <default("PacketQueue")> like IPacketQueue {
             @display("p=200,600");
         }
@@ -316,21 +316,21 @@ module EthernetMacLayer like IEthernetMacLayer
         preambleInserter: <default("EthernetPreambleInserter")> like IPacketFlow {
             @display("p=200,1000");
         }
-        typeOrLengthChecker: <default("EthernetTypeOrLengthChecker")> like IPacketFilter {
-            @display("p=500,100");
-        }
-        ctagChecker: <default("OmittedIeee8021qChecker")> like IIeee8021qChecker {
-            vlanTagType = "c";
-            @display("p=500,200");
-        }
-        stagChecker: <default("OmittedIeee8021qChecker")> like IIeee8021qChecker {
-            vlanTagType = "s";
-            @display("p=500,300");
-        }
-        addressChecker: <default("EthernetAddressChecker")> like IPacketFilter {
-            promiscuous = default(promiscuous);
-            @display("p=500,400");
-        }
+//        typeOrLengthChecker: <default("EthernetTypeOrLengthChecker")> like IPacketFilter {
+//            @display("p=500,100");
+//        }
+//        ctagChecker: <default("OmittedIeee8021qChecker")> like IIeee8021qChecker {
+//            vlanTagType = "c";
+//            @display("p=500,200");
+//        }
+//        stagChecker: <default("OmittedIeee8021qChecker")> like IIeee8021qChecker {
+//            vlanTagType = "s";
+//            @display("p=500,300");
+//        }
+//        addressChecker: <default("EthernetAddressChecker")> like IPacketFilter {
+//            promiscuous = default(promiscuous);
+//            @display("p=500,400");
+//        }
         fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {
             @display("p=500,900");
         }
@@ -338,12 +338,12 @@ module EthernetMacLayer like IEthernetMacLayer
             @display("p=500,1000");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> typeOrLengthInserter.in;
-        typeOrLengthInserter.out --> ctagInserter.in;
-        ctagInserter.out --> stagInserter.in;
-        stagInserter.out --> addressInserter.in;
-        addressInserter.out --> paddingInserter.in;
-        paddingInserter.out --> queue.in;
+        upperLayerIn --> { @display("m=n"); } --> queue.in;
+//        typeOrLengthInserter.out --> ctagInserter.in;
+//        ctagInserter.out --> stagInserter.in;
+//        stagInserter.out --> addressInserter.in;
+//        addressInserter.out --> paddingInserter.in;
+//        paddingInserter.out --> queue.in;
         queue.out --> server.in;
         server.out --> streamer.in;
         streamer.out --> fcsInserter.in;
@@ -352,11 +352,11 @@ module EthernetMacLayer like IEthernetMacLayer
 
         lowerLayerIn --> { @display("m=s"); } --> preambleChecker.in;
         preambleChecker.out --> fcsChecker.in;
-        fcsChecker.out --> addressChecker.in;
-        addressChecker.out --> stagChecker.in;
-        stagChecker.out --> ctagChecker.in;
-        ctagChecker.out --> typeOrLengthChecker.in;
-        typeOrLengthChecker.out --> { @display("m=n"); } --> upperLayerOut;
+//        fcsChecker.out --> addressChecker.in;
+//        addressChecker.out --> stagChecker.in;
+//        stagChecker.out --> ctagChecker.in;
+//        ctagChecker.out --> typeOrLengthChecker.in;
+        fcsChecker.out --> { @display("m=n"); } --> upperLayerOut;
 }
 
 module EthernetRawMacLayer extends EthernetMacLayer
@@ -395,8 +395,8 @@ module EthernetFragmentingMacLayer extends EthernetMacLayer
             @display("p=500,800");
         }
     connections:
-        fcsChecker.out --> { @reconnect; } --> defragmenter.in;
-        defragmenter.out --> { @reconnect; } --> addressChecker.in;
+//        fcsChecker.out --> { @reconnect; } --> defragmenter.in;
+//        defragmenter.out --> { @reconnect; } --> addressChecker.in;
 }
 
 module EthernetPreemptingMacLayer like IEthernetMacLayer
