@@ -179,7 +179,7 @@ module EtherQEncapModularized like IEtherEncap
         output lowerLayerOut @labels(EtherFrame); // to Ethernet MAC
     submodules:
         addressremover: EthernetAddressChecker {
-            indication = false;
+//            indication = false;
             promiscuous = true;
             @display("p=200,200");
         }
@@ -207,7 +207,7 @@ module EtherQEncapModularized like IEtherEncap
             @display("p=500,400");
         }
         addressReInserter: EthernetAddressInserter {
-            request = false;
+//            request = false;
             @display("p=500,200");
         }
 
